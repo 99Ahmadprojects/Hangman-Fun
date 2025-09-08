@@ -1,6 +1,6 @@
-# number_guess_hangman
+# Hangman Fun 😁
+Enter the correct guess and save the Hangman
 
-A new Flutter project.
 
 ## Getting Started
 

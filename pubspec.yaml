@@ -1,0 +1,34 @@
+name: number_guess_hangman
+description: A simple number guessing hangman-style game built with Flutter.
+publish_to: 'none'
+version: 1.0.0+2
+
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:   # 🔥 must be flutter_icons (not flutter_launcher_icons)
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/hangman.png
+  fonts:
+    - family: CooperBlack
+      fonts:
+        - asset: fonts/CooperBlack.ttf
+    - family: FontStyle
+      fonts:
+        - asset: fonts/fontstyle.ttf

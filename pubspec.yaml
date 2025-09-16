@@ -11,24 +11,23 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
 
+
+
+  # new packages used for the playful UI/animation
+  confetti: ^0.7.0
+  animated_text_kit: ^4.2.2
+  google_fonts: ^4.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
-
-flutter_icons:   # 🔥 must be flutter_icons (not flutter_launcher_icons)
-  android: true
-  ios: true
-  image_path: "assets/app_icon.png"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/hangman.png
   fonts:
-    - family: CooperBlack
+    - family: Marker
       fonts:
-        - asset: fonts/CooperBlack.ttf
-    - family: FontStyle
-      fonts:
-        - asset: fonts/fontstyle.ttf
+        - asset: fonts/marker.ttf
+

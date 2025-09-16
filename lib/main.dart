@@ -1,10 +1,15 @@
+// lib/main.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:confetti/confetti.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const HangmanApp());
 }
 
+/// Simple settings DTO
 class SettingsData {
   bool showHints;
   bool viewGuesses;
@@ -28,7 +33,7 @@ class _HangmanAppState extends State<HangmanApp> {
   SettingsData _settings = SettingsData(
     showHints: true,
     viewGuesses: true,
-    hangmanColor: Colors.black,
+    hangmanColor: Colors.deepPurple,
   );
 
   void _updateSettings(SettingsData newSettings) {
@@ -38,41 +43,36 @@ class _HangmanAppState extends State<HangmanApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Hangman Fun',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
         scaffoldBackgroundColor: Colors.orange[50],
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        textTheme: TextTheme(
+          bodyMedium: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+          headlineSmall: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.deepOrange,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            textStyle: const TextStyle(fontSize: 18),
+            textStyle: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ),
-      // Use a Builder so the provided context is *below* MaterialApp (so Navigator exists).
       home: Builder(builder: (context) {
         return LandingPage(
           settings: _settings,
           onStartGame: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => GamePage(settings: _settings)),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => GamePage(settings: _settings)));
           },
           onOpenSettings: () {
             Navigator.of(context)
-                .push<SettingsData>(
-              MaterialPageRoute(builder: (_) => SettingsPage(settings: _settings)),
-            )
+                .push<SettingsData>(MaterialPageRoute(builder: (_) => SettingsPage(settings: _settings)))
                 .then((result) {
-              if (result != null) {
-                _updateSettings(result);
-              }
+              if (result != null) _updateSettings(result);
             });
           },
         );
@@ -81,7 +81,7 @@ class _HangmanAppState extends State<HangmanApp> {
   }
 }
 
-/// Landing Page
+/// Landing Page - now playful and animated
 class LandingPage extends StatelessWidget {
   final VoidCallback onStartGame;
   final VoidCallback onOpenSettings;
@@ -96,71 +96,98 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    GoogleFonts.permanentMarker(
+      fontSize: 36,
+      color: Colors.white,
+      shadows: [const Shadow(color: Colors.black26, blurRadius: 6, offset: Offset(2, 2))],
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Hangman Fun',
-                                        style: TextStyle(
-                                          fontFamily: 'CooperBlack',
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.lightBlue,
-                                          fontSize: 30,
-                                        ),)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const Text(
-              'Save the HangMan',
-              style: TextStyle(
-                fontFamily: 'FontStyle',
-                fontWeight: FontWeight.w500,
-                color: Colors.lightBlue,
-                fontSize: 35,
-                height: 4,
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.orange.shade400, Colors.pink.shade200],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                AnimatedTextKit(
+                  animatedTexts: [
+                    ColorizeAnimatedText(
+                      'Save the Hangman!',
+                      textStyle: const TextStyle(
+                        fontFamily: 'Marker', // must match your pubspec.yaml
+                        fontWeight: FontWeight.w500,
+                        fontSize: 35,
+                        height: 1.2,
+                      ),
+                      colors: [
+                        Colors.white,
+                        //Colors.white,
+                        Colors.blue,
+                      ],
+                    ),
+                  ],
+                  isRepeatingAnimation: true, // makes it loop
+                  repeatForever: true,        // continuous animation
+                ),
+                const SizedBox(height: 10),
+                Text('A silly number guessing Hangman', style: GoogleFonts.poppins(color: Colors.white70)),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: 220,
+                  height: 220,
+                  child: Image.asset(
+                    'assets/hangman.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.sentiment_very_satisfied, size: 120, color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: onStartGame,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [Icon(Icons.play_arrow), SizedBox(width: 8), Text('Start Game')],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                OutlinedButton.icon(
+                  onPressed: onOpenSettings,
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Settings'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white54),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Hints: ${settings.showHints ? "ON" : "OFF"} •• Guesses: ${settings.viewGuesses ? "Shown" : "Hidden"}',
+                    style: GoogleFonts.poppins(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 0),
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: Image.asset(
-                'assets/hangman.png',
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(Icons.gamepad, size: 120),
-              ),
-            ),
-            const SizedBox(height: 60),
-            ElevatedButton(
-              child: const Text('Start Game',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    fontSize: 25,
-                  )),
-              onPressed: onStartGame,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              child: const Text('Settings',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    fontSize: 25,
-                  )),
-              onPressed: onOpenSettings,
-            ),
-            const SizedBox(height: 30),
-            Text('Hints: ${settings.showHints ? "ON" : "OFF"} •• Guesses: ${settings.viewGuesses ? "Showing" : "Hidden"}'),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Settings Page
+/// Settings page
 class SettingsPage extends StatefulWidget {
   final SettingsData settings;
-
   const SettingsPage({super.key, required this.settings});
 
   @override
@@ -172,30 +199,18 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool viewGuesses;
   late Color selectedColor;
 
-  final List<Color> colorOptions = [
-    Colors.black,
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.purple,
-    Colors.orange,
-  ];
+  final List<Color> colorOptions = [Colors.deepPurple, Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange];
 
   @override
   void initState() {
-    super.initState();
     showHints = widget.settings.showHints;
     viewGuesses = widget.settings.viewGuesses;
     selectedColor = widget.settings.hangmanColor;
+    super.initState();
   }
 
   void _saveAndExit() {
-    final newSettings = SettingsData(
-      showHints: showHints,
-      viewGuesses: viewGuesses,
-      hangmanColor: selectedColor,
-    );
-    Navigator.pop(context, newSettings);
+    Navigator.pop(context, SettingsData(showHints: showHints, viewGuesses: viewGuesses, hangmanColor: selectedColor));
   }
 
   @override
@@ -204,324 +219,326 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(title: const Text('Settings')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Game Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                const Expanded(child: Text('Show Hints: ', style: TextStyle(fontSize: 18))),
-                Switch(value: showHints, onChanged: (val) => setState(() => showHints = val)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Expanded(child: Text('View Guesses: ', style: TextStyle(fontSize: 18))),
-                Switch(value: viewGuesses, onChanged: (val) => setState(() => viewGuesses = val)),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text('Hangman Color', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              children: colorOptions.map((c) {
-                final isSelected = c.value == selectedColor.value;
-                return GestureDetector(
-                  onTap: () => setState(() => selectedColor = c),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: isSelected ? Border.all(width: 3, color: Colors.black) : null,
-                    ),
-                    child: CircleAvatar(radius: 20, backgroundColor: c),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Game Settings', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 18),
+          Row(children: [const Expanded(child: Text('Show Hints')), Switch(value: showHints, onChanged: (v) => setState(() => showHints = v))]),
+          Row(children: [const Expanded(child: Text('View Guesses')), Switch(value: viewGuesses, onChanged: (v) => setState(() => viewGuesses = v))]),
+          const SizedBox(height: 18),
+          const Text('Hangman Color', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            children: colorOptions.map((c) {
+              final isSelected = c.value == selectedColor.value;
+              return GestureDetector(
+                onTap: () => setState(() => selectedColor = c),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: isSelected ? Border.all(width: 3, color: Colors.black) : null,
                   ),
-                );
-              }).toList(),
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: CircleAvatar(radius: 20, backgroundColor: c),
                 ),
-                ElevatedButton(onPressed: _saveAndExit, child: const Text('Save')),
-              ],
-            ),
-          ],
-        ),
+              );
+            }).toList(),
+          ),
+          const Spacer(),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(onPressed: _saveAndExit, child: const Text('Save'))
+          ])
+        ]),
       ),
     );
   }
 }
 
-/// Game Page
+/// GamePage — fully interactive
 class GamePage extends StatefulWidget {
   final SettingsData settings;
-
   const GamePage({super.key, required this.settings});
 
   @override
   State<GamePage> createState() => _GamePageState();
 }
 
-class _GamePageState extends State<GamePage> {
+class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   final int maxAttempts = 6;
-
   late int _target;
   int _attempts = 0;
   bool _won = false;
   bool _lost = false;
-
-  String _hint = '';
   List<int> _guesses = [];
+  String _hint = '';
+  late ConfettiController _confettiController;
+
+  // animation helpers for playful micro-interactions
+  late AnimationController _headBumpController;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _headBumpController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _headBumpController.addStatusListener((s) {
+      if (s == AnimationStatus.completed) _headBumpController.reverse();
+    });
     _startNewGame();
   }
 
   void _startNewGame() {
     setState(() {
-      _target = Random().nextInt(20); // 0-19
+      _target = Random().nextInt(20); // 0..19
       _attempts = 0;
       _won = false;
       _lost = false;
-      _guesses.clear();
-      _hint = '';
+      _guesses = [];
+      _hint = 'Make a guess! Tap a number or type it.';
       _controller.clear();
     });
   }
 
-  void _onGuess() {
+  // funny hint generator
+  String _cheekyHint(int guess) {
+    final diff = (guess - _target).abs();
+    if (guess == _target) return 'BOOM! Perfect!';
+    if (diff == 1) return "So close! You're on 🔥";
+    if (diff <= 3) return "You're pretty warm 🔥";
+    if (diff <= 6) return "Mildly warm 🙂";
+    return "Brrr... cold 🥶 Try another!";
+  }
+
+  void _handleGuess(int guess) {
     if (_won || _lost) return;
-
-    final guess = int.tryParse(_controller.text.trim());
-    if (guess == null || guess < 0 || guess > 19) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a number between 0 and 19')),
-      );
-      return;
-    }
-
-    _controller.clear();
-
+    if (guess < 0 || guess > 19) return;
     if (_guesses.contains(guess)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You already guessed that number')),
-      );
+      // small head bump animation for repeat guess
+      _headBumpController.forward(from: 0);
+      setState(() => _hint = 'You already guessed $guess — try another!');
       return;
     }
-
     setState(() {
       _guesses.add(guess);
       _attempts++;
+      _hint = widget.settings.showHints ? _cheekyHint(guess) : '';
     });
+
+    // play micro-animation
+    _headBumpController.forward(from: 0);
 
     if (guess == _target) {
       setState(() {
         _won = true;
-        _hint = 'You guessed it!';
       });
-      _showDialog('You won! 🥇', 'Correct number: $_target  😎');
+      _confettiController.play();
+      Future.delayed(const Duration(milliseconds: 350), () {
+        _showEndDialog('You won! 🥳', 'Correct number: $_target\nYou saved the hangman!🎉');
+      });
       return;
     }
 
     if (_attempts >= maxAttempts) {
-      setState(() => _lost = true);
-      _showDialog('You lost 😔', 'The number was $_target  (🤪)');
+      setState(() {
+        _lost = true;
+      });
+      Future.delayed(const Duration(milliseconds: 350), () {
+        _showEndDialog('You lost 😢', 'The number was $_target\nBetter luck next time!');
+      });
       return;
     }
-
-    setState(() {
-      _hint = guess > _target ? 'Try smaller number' : 'Try bigger number';
-    });
   }
 
-  Future<void> _showDialog(String title, String content) async {
+  Future<void> _showEndDialog(String title, String content) async {
     await showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(title),
         content: Text(content),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
         ],
       ),
     );
-
-    // restart when dialog dismissed
     _startNewGame();
   }
 
+  // build playful hangman - parts appear based on attempts
   Widget _buildHangman(Color color) {
     final partsVisible = _attempts.clamp(0, maxAttempts);
-
-    return LayoutBuilder(builder: (context, constraints) {
-      final w = constraints.maxWidth;
-      const h = 200.0;
-
-      final double postWidth = (w * 0.02).clamp(12, 12).toDouble();
-      final double gallowLeft = (w * 0.08).toDouble();
-      final double beamLength = (w * 0.52).clamp(120, w - 40).toDouble();
-      final double ropeX = gallowLeft + beamLength;
-
-      final double headRadius = (w * 0.06).clamp(12, 28).toDouble();
-      const double headTop = 30.0;
-      final double bodyHeight = (h * 0.22).clamp(30, 80).toDouble();
-      final double armLength = (w * 0.12).clamp(20, 60).toDouble();
-      final double legLength = (h * 0.15).clamp(20, 60).toDouble();
-
-      return SizedBox(
-        height: h,
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            // Gallow post
-            Positioned(
-              left: gallowLeft,
-              top: 0,
-              bottom: 0,
-              child: Container(width: postWidth, color: Colors.brown),
-            ),
-            // Beam
-            Positioned(
-              left: gallowLeft,
-              top: 0,
-              child: Container(width: beamLength, height: 16, color: Colors.brown),
-            ),
-            // Short vertical at beam end
-            Positioned(
-              left: ropeX - (postWidth / 2),
-              top: 8,
-              child: Container(width: postWidth / 2, height: 28, color: Colors.brown),
-            ),
-            // Head
-            if (partsVisible > 0)
-              Positioned(
-                top: headTop,
-                left: ropeX - headRadius - 3,
-                child: CircleAvatar(radius: headRadius, backgroundColor: color),
-              ),
-            // Body
-            if (partsVisible > 1)
-              Positioned(
-                top: headTop + headRadius * 2,
-                left: ropeX - 2,
-                child: Container(width: 4, height: bodyHeight, color: color),
-              ),
-            // Left arm
-            if (partsVisible > 2)
-              Positioned(
-                top: headTop + headRadius * 2 + (bodyHeight * 0.5),
-                left: ropeX - armLength + 2,
-                child: Transform.rotate(
-                  angle: -pi / 8,
-                  alignment: Alignment.centerLeft,
-                  child: Container(width: armLength, height: 4, color: color),
-                ),
-              ),
-            // Right arm
-            if (partsVisible > 3)
-              Positioned(
-                top: headTop + headRadius * 2 + (bodyHeight * 0.15),
-                left: ropeX + 1,
-                child: Transform.rotate(
-                  angle: pi / 8,
-                  alignment: Alignment.centerLeft,
-                  child: Container(width: armLength, height: 4, color: color),
-                ),
-              ),
-            // Left leg
-            if (partsVisible > 4)
-              Positioned(
-                top: headTop + headRadius * 2 + bodyHeight,
-                left: ropeX - 3,
-                child: Transform.rotate(
-                  angle: pi / 6,
-                  alignment: Alignment.topLeft,
-                  child: Container(width: 4, height: legLength, color: color),
-                ),
-              ),
-            // Right leg
-            if (partsVisible > 5)
-              Positioned(
-                top: headTop + headRadius * 2 + (bodyHeight + 1),
-                left: ropeX + 0,
-                child: Transform.rotate(
-                  angle: -pi / 6,
-                  alignment: Alignment.topLeft,
-                  child: Container(width: 4, height: legLength, color: color),
-                ),
-              ),
-          ],
-        ),
+    // small animation via TweenAnimationBuilder for each part
+    Widget animatedPart({required Widget child, required bool visible, int delay = 0}) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.7, end: visible ? 1.0 : 0.7),
+        duration: Duration(milliseconds: 350),
+        curve: Curves.elasticOut,
+        builder: (context, scale, _) => Opacity(opacity: visible ? 1 : 0.0, child: Transform.scale(scale: scale, child: child)),
       );
-    });
+    }
+
+    final head = animatedPart(
+      visible: partsVisible > 0,
+      child: AnimatedBuilder(
+        animation: _headBumpController,
+        builder: (c, child) {
+          final bump = 1 + (_headBumpController.value * 0.06);
+          return Transform.scale(scale: bump, child: child);
+        },
+        child: CircleAvatar(
+          radius: 28,
+          backgroundColor: color,
+          child: Text(
+            _won ? '😎' : _lost ? '😵' : '🙂',
+            style: const TextStyle(fontSize: 26),
+          ),
+        ),
+      ),
+    );
+
+    final body = animatedPart(
+      visible: partsVisible > 1,
+      child: Container(width: 6, height: 64, color: color),
+    );
+
+    final leftArm = animatedPart(visible: partsVisible > 2, child: Transform.rotate(angle: -pi / 6, child: Container(width: 48, height: 6, color: color)));
+    final rightArm = animatedPart(visible: partsVisible > 3, child: Transform.rotate(angle: pi / 6, child: Container(width: 48, height: 6, color: color)));
+    final leftLeg = animatedPart(visible: partsVisible > 4, child: Transform.rotate(angle: pi / 6, child: Container(width: 6, height: 48, color: color)));
+    final rightLeg = animatedPart(visible: partsVisible > 5, child: Transform.rotate(angle: -pi / 6, child: Container(width: 6, height: 48, color: color)));
+
+    return SizedBox(
+      height: 220,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          // simple gallow
+          Positioned(top: 0, left: 36, child: Container(width: 8, height: 220, color: Colors.brown[700])),
+          Positioned(top: 0, left: 36, child: Container(width: 120, height: 12, color: Colors.brown[700])),
+          Positioned(top: 12, left: 34 + 114, child: Container(width: 8, height: 28, color: Colors.brown[700])),
+          // hangman body parts near the beam
+          Positioned(top: 40, left: 25 + 114 - 14, child: head),
+          Positioned(top: 40 + 56, left: 37 + 114 - 2, child: body),
+          Positioned(top: 40 + 80, left: 36 + 114 - 45, child: leftArm),
+          Positioned(top: 40 + 80, left: 36 + 114 + 1, child: rightArm),
+          Positioned(top: 40 + 115, left: 36 + 114 - 14, child: leftLeg),
+          Positioned(top: 40 + 115, left: 36 + 114 + 12, child: rightLeg),
+          // confetti overlay
+          Positioned.fill(child: IgnorePointer(child: ConfettiWidget(confettiController: _confettiController, blastDirectionality: BlastDirectionality.explosive, shouldLoop: false))),
+        ],
+      ),
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _confettiController.dispose();
+    _headBumpController.dispose();
     super.dispose();
+  }
+
+  Widget _buildKeypad() {
+    return GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 5,
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 8,
+      childAspectRatio: 1.2,
+      physics: const NeverScrollableScrollPhysics(),
+      children: List.generate(10, (i) {
+        final disabled = _guesses.contains(i) || _won || _lost;
+        return ElevatedButton(
+          onPressed: disabled ? null : () => _handleGuess(i),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.all(6),
+            backgroundColor: disabled ? Colors.grey.shade300 : Colors.white,
+            foregroundColor: disabled ? Colors.grey : Colors.black87,
+            elevation: 4,
+            shadowColor: Colors.black12,
+          ),
+          child: Text(
+            '$i',
+            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+        );
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final hangmanColor = widget.settings.hangmanColor;
     return Scaffold(
-      appBar: AppBar(title: const Text('Hangman Game')),
+      appBar: AppBar(title: const Text('Hangman Game 🎯')),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 40,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHangman(widget.settings.hangmanColor),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Enter your Guess 🤔 (0 - 19)',
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (_) => _onGuess(),
+          padding: EdgeInsets.only(left: 16, right: 16, top: 18, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            _buildHangman(hangmanColor),
+            const SizedBox(height: 8),
+            // hearts (attempts left)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(maxAttempts, (i) {
+// before used attempts are filled; reverse to show remaining
+                final showFilled = i < (maxAttempts - _attempts);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(Icons.favorite, color: showFilled ? Colors.redAccent : Colors.grey.shade400, size: 22),
+                );
+              }),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Type a guess (0 - 19)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: () {
+                  final value = int.tryParse(_controller.text.trim());
+                  if (value != null) {
+                    _handleGuess(value);
+                    _controller.clear();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter 0 - 19')));
+                  }
+                }),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: ElevatedButton(onPressed: _onGuess, child: const Text('Guess'))),
-                  const SizedBox(width: 12),
-                  ElevatedButton(onPressed: _startNewGame, child: const Text('Restart')),
-                ],
-              ),
-              const SizedBox(height: 30),
-              if (widget.settings.showHints) Text(_hint, style: const TextStyle(fontSize: 20)),
-              const SizedBox(height: 10),
-              if (widget.settings.viewGuesses)
-                Text('Guesses: ${_guesses.join(" - ")}', overflow: TextOverflow.visible)
-              else
-                const Text('Guesses are hidden'),
-              const SizedBox(height: 10),
-              Text('Attempts: $_attempts Out of $maxAttempts'),
-              const SizedBox(height: 16),
-            ],
-          ),
+              onSubmitted: (_) {
+                final value = int.tryParse(_controller.text.trim());
+                if (value != null) {
+                  _handleGuess(value);
+                  _controller.clear();
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: ElevatedButton(onPressed: () => _handleGuess(-1), child: const Text('Hint (Try keys)'))),
+              const SizedBox(width: 12),
+              ElevatedButton(onPressed: _startNewGame, child: const Text('Restart')),
+            ]),
+            const SizedBox(height: 15),
+            // keypad
+            _buildKeypad(),
+            const SizedBox(height: 15),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              child: widget.settings.showHints
+                  ? Text(_hint, key: ValueKey(_hint), style: const TextStyle(fontSize: 18), textAlign: TextAlign.center)
+                  : const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 15),
+            widget.settings.viewGuesses
+                ? Text('Guesses: ${_guesses.join(" • ")}', textAlign: TextAlign.center)
+                : const Center(child: Text('Guesses are hidden')),
+            const SizedBox(height: 10),
+            Text('Attempts: $_attempts of $maxAttempts', textAlign: TextAlign.center),
+            const SizedBox(height: 22),
+          ]),
         ),
       ),
     );

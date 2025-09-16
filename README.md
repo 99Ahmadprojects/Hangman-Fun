@@ -5,9 +5,7 @@ Enter the correct guess and save the Hangman
 
 
 
-  - https://drive.google.com/file/d/1ZL99e8rk-FZgAv9bAnGL3CCbuyD4u1xw/view?usp=sharing
-
-
+  - https://drive.google.com/file/d/1mbnQZBRwtQSSSt3_wJTCoQTpkwVy9YV3/view?usp=sharing
 
 
 ## Getting Started
